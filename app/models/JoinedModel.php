@@ -7,6 +7,14 @@ class JoinedModel {
         $this->model = $model;
     }
 
+    public function getColumns()
+    {
+        return $this->model->getColumns();
+    }
+    public function getTable() {
+        return $this->model->getTable();
+    }
+
     public function leftJoin(string $modelClass, string $primary, string $foreign)
     {
         return $this->model->leftJoin($modelClass, $primary, $foreign, $this->model);

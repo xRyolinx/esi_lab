@@ -50,6 +50,25 @@ $router->put('/admin/users/{id_user}', 'UsersController:updateUser', [
 $router->delete('/admin/users/{id_user}', 'UsersController:deleteUser', [
     Middlewares::requirePermissionsPage(['users.write']),
 ]);
+// partenaires
+$router->get('/admin/partenaires', 'PartenairesController:allPartenairesPage', [
+     Middlewares::requirePermissionsPage(['partenaires.read']),
+]);
+$router->get('/admin/partenaires/new', 'PartenairesController:createPartenairePage', [
+     Middlewares::requirePermissionsPage(['partenaires.write']),
+]);
+$router->get('/admin/partenaires/{id_partenaire}', 'PartenairesController:singlePartenairePage', [
+     Middlewares::requirePermissionsPage(['partenaires.read']),
+]);
+$router->post('/admin/partenaires', 'PartenairesController:createPartenaire', [
+     Middlewares::requirePermissionsPage(['partenaires.write']),
+]);
+$router->put('/admin/partenaires/{id_partenaire}', 'PartenairesController:updatePartenaire', [
+     Middlewares::requirePermissionsPage(['partenaires.write']),
+]);
+$router->delete('/admin/partenaires/{id_partenaire}', 'PartenairesController:deletePartenaire', [
+     Middlewares::requirePermissionsPage(['partenaires.write']),
+]);
 
 
 // equipes
@@ -113,13 +132,19 @@ $router->get('/admin/projets/new', 'ProjetsController:createProjetPage', [
 $router->post('/admin/projets', 'ProjetsController:create', [
     Middlewares::requirePermissionsPage(['projets.write']),
 ]);
+$router->get('/admin/projets/stats', 'ProjetsController:stats', [
+    Middlewares::requirePermissionsPage(['projets.read']),
+]);
 $router->get('/admin/projets/{id_projet}', 'ProjetsController:singleProjetPage', [
     Middlewares::requirePermissionsPage(['projets.read']),
 ]);
 $router->put('/admin/projets/{id_projet}', 'ProjetsController:edit', [
     Middlewares::requirePermissionsPage(['projets.write']),
 ]);
-$router->post('/admin/projets/{id_projet}/cloturer', 'ProjetsController:cloturer', [
+$router->put('/admin/projets/{id_projet}/cloturer', 'ProjetsController:cloturer', [
+    Middlewares::requirePermissionsPage(['projets.write']),
+]);
+$router->put('/admin/projets/{id_projet}/reouvrir', 'ProjetsController:reouvrir', [
     Middlewares::requirePermissionsPage(['projets.write']),
 ]);
 $router->post('/admin/projets/{id_projet}/add-user', 'ProjetsController:addUser', [
@@ -132,6 +157,9 @@ $router->post('/admin/projets/{id_projet}/add-partenaire', 'ProjetsController:ad
     Middlewares::requirePermissionsPage(['projets.write']),
 ]);
 $router->post('/admin/projets/{id_projet}/remove-partenaire', 'ProjetsController:removePartenaire', [
+    Middlewares::requirePermissionsPage(['projets.write']),
+]);
+$router->post('/admin/projets/{id_projet}/set-responsable', 'ProjetsController:setResponsable', [
     Middlewares::requirePermissionsPage(['projets.write']),
 ]);
 $router->get('/admin/projets/stats', 'ProjetsController:stats', [

@@ -22,8 +22,9 @@ CREATE TABLE equipes (
     nom_equipe VARCHAR(100),
     description TEXT,
     date_creation DATE,
-    id_chef INT,
-    FOREIGN KEY (id_chef) REFERENCES users(id_user) ON DELETE SET NULL
+
+    id_responsable INT DEFAULT NULL,
+    FOREIGN KEY (id_responsable) REFERENCES users(id_user) ON DELETE SET NULL
 );
 
 CREATE TABLE users (
@@ -53,14 +54,16 @@ CREATE TABLE projets (
     type_financement VARCHAR(100),
     statut ENUM('en_cours', 'termine') DEFAULT 'en_cours',
     date_debut DATE,
-    date_fin DATE
+    date_fin DATE,
+
+    id_responsable INT,
+    FOREIGN KEY (id_responsable) REFERENCES users(id_user) ON DELETE SET NULL
 );
 
 CREATE TABLE projet_user (
     id INT PRIMARY KEY AUTO_INCREMENT,
     id_projet INT,
     id_user INT,
-    is_responsable BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (id_projet) REFERENCES projets(id_projet) ON DELETE CASCADE,
     FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE
 );

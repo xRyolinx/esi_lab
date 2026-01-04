@@ -49,11 +49,17 @@ abstract class BaseModel
     // necessaires pour join imbriqué
     public function getTable(): string
     {
-        return $this->joins['table'] ?? static::$table;
+        if (empty($this->joins['table'])) {
+            return static::$table;
+        }
+        return $this->joins['table'];
     }
     public function getColumns(): array
     {
-        return $this->joins['columns'] ?? static::$columns;
+        if (empty($this->joins['columns'])) {
+            return static::$columns;
+        }
+        return $this->joins['columns'];
     }
 
 
@@ -386,44 +392,35 @@ abstract class BaseModel
         $relatedKey = $relation['related_key'];
         $relatedModel = $relation['related_model'];
 
+        require_once "$relatedModel.php";
+
+        // table
+        $table = "$pivotTable LEFT JOIN $relatedModel ON $pivotTable.$relatedKey = $relatedModel." . $relatedModel::$pk;
+
+        // filter only needed rows
         $ids = array_column($rows, $selfKey);
         if (empty($ids))
             return $rows;
-
-        require_once "$relatedModel.php";
-
-        $db = static::db();
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $stmt = $db->prepare("SELECT * FROM $pivotTable WHERE $selfKey IN ($placeholders)");
+        $cond = "$pivotTable.$selfKey IN ($placeholders)";
+
+        // get all
+        $db = static::db();
+        $stmt = $db->prepare("SELECT * FROM $table WHERE $cond");
         $stmt->execute($ids);
-        $pivotRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $map = [];
-        $relatedIds = [];
-        foreach ($pivotRows as $pr) {
-            $map[$pr[$selfKey]][] = $pr[$relatedKey];
-            $relatedIds[] = $pr[$relatedKey];
-        }
-        $relatedIds = array_unique($relatedIds);
-
-        $relatedObjects = [];
-        if (!empty($relatedIds)) {
-            $relatedObjectsById = $relatedModel::getAllIndexedBy(column: $relatedModel::$pk, conditions: [
-                [$relatedModel::$pk => ['comparaison' => 'IN', 'valeur' => $relatedIds]]
-            ]);
-            $relatedObjects = $relatedObjectsById;
+        // indexer
+        $indexed = [];
+        foreach ($results as $row) {
+            if (isset($row[$selfKey])) {
+                $indexed[$row[$selfKey]][] = $row;
+            }
         }
 
         // assigner aux parents
         foreach ($rows as &$row) {
-            $row[$relationName] = [];
-            if (isset($map[$row[$selfKey]])) {
-                foreach ($map[$row[$selfKey]] as $rid) {
-                    if (isset($relatedObjects[$rid])) {
-                        $row[$relationName][] = &$relatedObjects[$rid];
-                    }
-                }
-            }
+            $row[$relationName] = $indexed[$row[$selfKey]] ?? [];
         }
 
         // sous-relations imbriquées
@@ -503,8 +500,13 @@ abstract class BaseModel
                     }
                     // IN / NOT IN
                     elseif (in_array($op, ['IN', 'NOT IN'])) {
-                        if (!is_array($value) || empty($value)) {
-                            throw new Exception("$op requires a non-empty array of values");
+                        if (!is_array($value)) {
+                            throw new Exception("$op requires an array of values");
+                        }
+                        if (empty($value)) {
+                            // empty IN clause, always false
+                            $andConds[] = ($op === 'IN') ? '0=1' : '1=1';
+                            continue;
                         }
                         $placeholders = [];
                         foreach ($value as $j => $v) {

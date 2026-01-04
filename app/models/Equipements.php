@@ -42,7 +42,7 @@ class Equipements extends BaseModel {
         if ($include['user'] ?? false) {
             $users = Users::getAllIndexedBy(column: 'id_equipement');
             foreach ($equipements as &$equipement) {
-                $equipement['user'] = $users[$equipement['id_equipement']] ?? null;
+                $equipement['user'] = $users[$equipement['id_equipement']] ?? [];
             }
         }
         return $equipements;

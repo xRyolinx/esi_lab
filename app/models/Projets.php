@@ -38,7 +38,8 @@ class Projets extends BaseModel
         'type_financement',
         'statut',
         'date_debut',
-        'date_fin'
+        'date_fin',
+        'id_responsable'
     ];
     protected static $fillable = [
         'titre',
@@ -47,7 +48,8 @@ class Projets extends BaseModel
         'type_financement',
         'statut',
         'date_debut',
-        'date_fin'
+        'date_fin',
+        'id_responsable'
     ];
     protected static $hidden = [];
     public static $pk = 'id_projet';
@@ -60,7 +62,7 @@ class Projets extends BaseModel
     public $statut;
     public $date_debut;
     public $date_fin;
-
+    public $id_responsable;
 
     public static function countByThematique()
     {

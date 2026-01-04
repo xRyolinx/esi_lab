@@ -23,18 +23,31 @@ class ProjetsController
     }
     public function singleProjetPage($id_projet)
     {
+        // get project with users and partenaires
         $projet = Projets::getUnique(
-            conditions: ['id_projet' => $id_projet],
+            conditions: [['id_projet' => ['valeur' => $id_projet]]],
             include: ['users', 'partenaires']
         );
         if (!$projet) {
             SessionManager::setFlashMessage('error', "Projet introuvable.");
-            // header('Location: /admin/projets');
+            header('Location: /admin/projets');
             exit;
         }
 
+        // get users dispo
+        $users_disponibles = Users::getAll(conditions: [
+            ['id_user' => ['comparaison' => 'NOT IN', 'valeur' => array_map(fn($u) => $u['id_user'], $projet['users'] ?? [])]]
+        ]);
+
+        // get partenaires dispo
+        $partenaires_disponibles = Partenaires::getAll(conditions: [
+            ['id_partenaire' => ['comparaison' => 'NOT IN', 'valeur' => array_map(fn($p) => $p['id_partenaire'], $projet['partenaires'] ?? [])]]
+        ]);
+
         $page = new SingleProjetPage('Projet', [
             'projet' => $projet,
+            'users_disponibles' => $users_disponibles,
+            'partenaires_disponibles' => $partenaires_disponibles
         ]);
         $page->render();
     }
@@ -73,6 +86,7 @@ class ProjetsController
             'statut' => 'en_cours',
             'date_debut' => $_POST['date_debut'],
             'date_fin' => $_POST['date_fin'] ?? null,
+            'id_responsable' => null
         ]);
 
         SessionManager::setFlashMessage('success', 'Projet créé.');
@@ -95,7 +109,7 @@ class ProjetsController
         }
 
         if (!$check) {
-            header('Location: /admin/projets/' . urlencode($id_projet) . '/edit');
+            header('Location: /admin/projets/' . urlencode($id_projet));
             exit;
         }
 
@@ -107,11 +121,40 @@ class ProjetsController
             'type_financement' => $_POST['type_financement'] ?? '',
             'date_debut' => $_POST['date_debut'],
             'date_fin' => $_POST['date_fin'] ?? null,
-            'statut' => $_POST['statut'],
+            'statut' => $_POST['statut']
         ];
         Projets::edit($projet, 'id_projet', $id_projet);
 
         SessionManager::setFlashMessage('success', 'Projet modifié.');
+        header('Location: /admin/projets/' . urlencode($id_projet));
+        exit;
+    }
+
+    // Définir le responsable du projet
+    public function setResponsable($id_projet)
+    {
+        $id_responsable = $_POST['id_responsable'] ?? null;
+
+        // vérifier si l'utilisateur est membre du projet
+        $membre = ProjetUser::getUnique(conditions: [
+            [
+                'id_user' => ['valeur' => $id_responsable],
+                'id_projet' => ['valeur' => $id_projet]
+            ]
+        ]);
+        if ($id_responsable && !$membre) {
+            SessionManager::setFlashMessage('error', "L'utilisateur doit être membre du projet pour être responsable.");
+            header('Location: /admin/projets/' . urlencode($id_projet));
+            exit;
+        }
+
+        // edit
+        Projets::edit([
+            'id_responsable' => $id_responsable ?: null
+        ], 'id_projet', $id_projet);
+
+        // fin
+        SessionManager::setFlashMessage('success', 'Responsable du projet mis à jour.');
         header('Location: /admin/projets/' . urlencode($id_projet));
         exit;
     }
@@ -130,8 +173,23 @@ class ProjetsController
     // Clôturer un projet (statut)
     public function cloturer($id_projet)
     {
-        Projets::edit(['statut' => 'termine'], 'id_projet', $id_projet);
+        Projets::edit([
+            'statut' => 'termine',
+            'date_fin' => date('Y-m-d')
+        ], 'id_projet', $id_projet);
         SessionManager::setFlashMessage('success', 'Projet clôturé.');
+        header('Location: /admin/projets/' . urlencode($id_projet));
+        exit;
+    }
+
+    // Rouvrir un projet (statut)
+    public function reouvrir($id_projet)
+    {
+        Projets::edit([
+            'statut' => 'en_cours',
+            'date_fin' => '0000-00-00'
+        ], 'id_projet', $id_projet);
+        SessionManager::setFlashMessage('success', 'Projet rouvert.');
         header('Location: /admin/projets/' . urlencode($id_projet));
         exit;
     }
@@ -166,6 +224,7 @@ class ProjetsController
                     'id_user' => ['valeur' => $id_user]
                 ]
             ]);
+            Projets::edit(['id_responsable' => null], 'id_projet', $id_projet);
             SessionManager::setFlashMessage('success', 'Utilisateur retiré du projet.');
         }
         header('Location: /admin/projets/' . urlencode($id_projet));
@@ -211,10 +270,70 @@ class ProjetsController
     // Statistiques (exemple)
     public function stats()
     {
-        $par_thematique = Projets::countByThematique();
-        $par_annee = Projets::countByAnnee();
-        $par_encadrant = Projets::countByEncadrant();
-        // ...render view (à compléter)
+        $projets = Projets::getAll();
+        // Par thématique
+        $par_thematique = [];
+        foreach ($projets as $p) {
+            $th = $p['thematique'] ?: 'Non défini';
+            $par_thematique[$th] = ($par_thematique[$th] ?? 0) + 1;
+        }
+        // Par responsable
+        $par_responsable = [];
+        foreach ($projets as $p) {
+            $resp = 'Aucun';
+            if (!empty($p['id_responsable'])) {
+                $user = Users::getUnique(conditions: [['id_user' => ['valeur' => $p['id_responsable']]]]);
+                if ($user)
+                    $resp = $user['nom'] . ' ' . $user['prenom'];
+            }
+            $par_responsable[$resp] = ($par_responsable[$resp] ?? 0) + 1;
+        }
+        // Par année (afficher les projets dont année_debut <= année, et année_fin >= année)
+        $par_annee = [];
+        $annees = [];
+        $currentYear = (int)date('Y');
+        foreach ($projets as $p) {
+            $debut = !empty($p['date_debut']) ? (int)substr($p['date_debut'], 0, 4) : null;
+            if ($p['statut'] === 'en_cours') {
+                $fin = $currentYear;
+            } else {
+                $fin = !empty($p['date_fin']) ? (int)substr($p['date_fin'], 0, 4) : $debut;
+            }
+            if ($debut) {
+                $annees[] = $debut;
+            }
+            if ($fin) {
+                $annees[] = $fin;
+            }
+        }
+        if ($annees) {
+            $min = min($annees);
+            $max = max($annees);
+            for ($an = $min; $an <= $max; $an++) {
+                $par_annee[$an] = [];
+                foreach ($projets as $p) {
+                    $debut = !empty($p['date_debut']) ? (int)substr($p['date_debut'], 0, 4) : null;
+                    if ($p['statut'] === 'en_cours') {
+                        $fin = $currentYear;
+                    } else {
+                        $fin = !empty($p['date_fin']) ? (int)substr($p['date_fin'], 0, 4) : $debut;
+                    }
+                    // Afficher pour toutes les années entre debut et fin (fin = année courante si en_cours)
+                    if ($debut && $fin && $debut <= $an && $fin >= $an) {
+                        $par_annee[$an][] = $p;
+                    }
+                }
+            }
+        }
+        require_once __DIR__ . '/../views/pages/admin/ProjetsStatsPage.php';
+        $page = new ProjetsStatsPage('Statistiques projets', [
+            'stats' => [
+                'par_thematique' => $par_thematique,
+                'par_responsable' => $par_responsable,
+                'par_annee' => $par_annee
+            ]
+        ]);
+        $page->render();
     }
 
     // Récupérer projets filtrés pour rapport PDF

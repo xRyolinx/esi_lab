@@ -19,6 +19,10 @@ class ProjetsPage extends AuthTemplate
             <div class="flex justify-between items-center mb-8">
                 <h1 class="text-3xl font-bold">Projets</h1>
                 <div class="flex gap-2">
+                    <a href="/admin/projets/stats"
+                        class="bg-secondary text-white px-4 py-2 rounded hover:bg-secondary-dark transition flex items-center gap-2">
+                        <i class="fas fa-chart-bar"></i> Statistiques
+                    </a>
                     <?php if ($canWrite): ?>
                         <a href="/admin/projets/new"
                             class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition flex items-center gap-2">
@@ -48,7 +52,7 @@ class ProjetsPage extends AuthTemplate
                                 <td class="px-4 py-2 text-center" colspan="8">Aucun projet trouvé.</td>
                             </tr>
                         <?php endif; ?>
-                            
+
                         <?php foreach ($this->projets as $projet): ?>
                             <tr class="border-b hover:bg-gray-50">
                                 <td class="px-4 py-2 text-center underline text-secondary"><a
@@ -57,8 +61,16 @@ class ProjetsPage extends AuthTemplate
                                 <td class="px-4 py-2"><?= htmlspecialchars($projet['titre']) ?></td>
                                 <td class="px-4 py-2"><?= htmlspecialchars($projet['thematique']) ?></td>
                                 <td class="px-4 py-2"><?= htmlspecialchars($projet['type_financement']) ?></td>
-                                <td class="px-4 py-2"><?= htmlspecialchars($projet['date_debut'] == '0000-00-00' ? '-' : $projet['date_debut']) ?></td>
-                                <td class="px-4 py-2"><?= htmlspecialchars($projet['date_fin'] == '0000-00-00' ? '-' : $projet['date_fin']) ?></td>
+                                <td class="px-4 py-2">
+                                    <?= htmlspecialchars($projet['date_debut'] == '0000-00-00' ? '-' : $projet['date_debut']) ?>
+                                </td>
+                                <td class="px-4 py-2">
+                                    <?php if ($projet['date_fin'] != '0000-00-00'): ?>
+                                        <?= htmlspecialchars($projet['date_fin']) ?>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
                                 <td class="px-4 py-2">
                                     <?php if ($projet['statut'] === 'en_cours'): ?>
                                         <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">En cours</span>

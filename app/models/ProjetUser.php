@@ -19,10 +19,10 @@ class ProjetUser extends BaseModel {
         ];
     protected static $table = 'projet_user';
     protected static $columns = [
-        'id', 'id_projet', 'id_user', 'is_responsable'
+        'id', 'id_projet', 'id_user'
     ];
     protected static $fillable = [
-        'id_projet', 'id_user', 'is_responsable'
+        'id_projet', 'id_user'
     ];
     protected static $hidden = [];
     public static $pk = 'id';
@@ -30,5 +30,4 @@ class ProjetUser extends BaseModel {
     public $id;
     public $id_projet;
     public $id_user;
-    public $is_responsable;
 }

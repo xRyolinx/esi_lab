@@ -22,6 +22,7 @@ class EquipesController
     // Page d'une équipe
     public function singleEquipePage($id_equipe)
     {
+        // equipe
         $equipe = Equipes::getUnique(
             conditions: [[Equipes::$pk => ['valeur' => $id_equipe]]],
             include: ['membres', 'nb_pubs', 'ressources']
@@ -31,7 +32,19 @@ class EquipesController
             header('Location: /admin/equipes');
             exit;
         }
-        $page = new SingleEquipePage('Détail équipe', ['equipe' => $equipe]);
+
+        // users dispo
+        $users_disponibles = Users::getAll(
+            conditions: [['id_user' => [
+                'comparaison' => 'NOT IN',
+                'valeur' => array_map(fn($u) => $u['id_user'], $equipe['membres']),
+            ]]]
+        );
+        
+        $page = new SingleEquipePage('Détail équipe', [
+            'equipe' => $equipe,
+            'users' => $users_disponibles
+        ]);
         $page->render();
     }
 

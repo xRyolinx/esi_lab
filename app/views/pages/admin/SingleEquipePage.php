@@ -7,10 +7,12 @@ require_once __DIR__ . '/../../../config/SessionManager.php';
 class SingleEquipePage extends AuthTemplate
 {
     private $equipe;
+    private $users;
     public function __construct($title = 'Détail équipe', array $data = [])
     {
         parent::__construct($title);
         $this->equipe = $data['equipe'] ?? [];
+        $this->users = $data['users'] ?? [];
     }
 
     protected function content()
@@ -146,7 +148,7 @@ class SingleEquipePage extends AuthTemplate
                     class="flex gap-2 items-center mb-8">
                     <select name="id_user" class="border px-3 py-2 rounded" required>
                         <option value="">Sélectionner un utilisateur</option>
-                        <?php foreach (Users::getAll([], [], []) as $u):
+                        <?php foreach ($this->users as $u):
                             if (empty($u['id_equipe'])): ?>
                                 <option value="<?= $u['id_user'] ?>">
                                     <?= htmlspecialchars($u['nom'] . ' ' . $u['prenom'] . ' (' . $u['email'] . ')') ?>
