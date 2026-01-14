@@ -6,7 +6,6 @@ class PublicationAuteur extends BaseModel
     protected static $table = 'publication_auteur';
     protected static $columns = [
         'id',
-        'ordre',
         'id_user',
         'id_publication'
     ];
@@ -25,7 +24,6 @@ class PublicationAuteur extends BaseModel
         ],
     ];
     protected static $fillable = [
-        'ordre',
         'id_user',
         'id_publication'
     ];
@@ -33,7 +31,6 @@ class PublicationAuteur extends BaseModel
     public static $pk = 'id';
 
     public $id;
-    public $ordre;
     public $id_user;
     public $id_publication;
 
@@ -48,10 +45,11 @@ class PublicationAuteur extends BaseModel
     public static function countByEquipe()
     {
         $db = static::db();
-        $stmt = $db->query("SELECT u.id_equipe, COUNT(pa.id) AS nb_publications
-            FROM " . static::$table . " pa
+        $stmt = $db->query("SELECT u.id_equipe, COUNT(DISTINCT pa.id_publication) AS nb_publications
+            FROM publication_auteur pa
             JOIN users u ON pa.id_user = u.id_user
-            GROUP BY u.id_equipe");
+            GROUP BY u.id_equipe"
+        );
         return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 }

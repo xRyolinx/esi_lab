@@ -23,8 +23,8 @@ CREATE TABLE equipes (
     description TEXT,
     date_creation DATE,
 
-    id_responsable INT DEFAULT NULL,
-    FOREIGN KEY (id_responsable) REFERENCES users(id_user) ON DELETE SET NULL
+    id_chef INT DEFAULT NULL,
+    FOREIGN KEY (id_chef) REFERENCES users(id_user) ON DELETE SET NULL
 );
 
 CREATE TABLE users (
@@ -39,6 +39,7 @@ CREATE TABLE users (
     domaine_recherche TEXT,
     biographie TEXT,
     role VARCHAR(50),
+    poste VARCHAR(100) DEFAULT NULL,
     statut ENUM('actif', 'suspendu', 'inactif') DEFAULT 'actif',
     date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
     id_equipe INT,
@@ -56,8 +57,8 @@ CREATE TABLE projets (
     date_debut DATE,
     date_fin DATE,
 
-    id_responsable INT,
-    FOREIGN KEY (id_responsable) REFERENCES users(id_user) ON DELETE SET NULL
+    id_chef INT,
+    FOREIGN KEY (id_chef) REFERENCES users(id_user) ON DELETE SET NULL
 );
 
 CREATE TABLE projet_user (
@@ -101,7 +102,6 @@ CREATE TABLE publications (
 
 CREATE TABLE publication_auteur (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    ordre INT,
     id_user INT,
     id_publication INT,
     FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE,
@@ -122,7 +122,7 @@ CREATE TABLE equipements (
     nom VARCHAR(100),
     type VARCHAR(50),
     description TEXT,
-    etat ENUM('libre', 'reserve', 'maintenance'),
+    statut ENUM('libre', 'maintenance'),
     localisation VARCHAR(100)
 );
 
@@ -130,8 +130,7 @@ CREATE TABLE reservations (
     id_reservation INT PRIMARY KEY AUTO_INCREMENT,
     date_debut DATETIME,
     date_fin DATETIME,
-    statut ENUM('en_attente', 'confirmee', 'annulee'),
-    date_reservation DATETIME,
+    date_reservation DATETIME DEFAULT CURRENT_TIMESTAMP,
     id_user INT,
     id_equipement INT,
     FOREIGN KEY (id_user) REFERENCES users(id_user),
@@ -143,10 +142,7 @@ CREATE TABLE actualites (
     titre VARCHAR(200),
     description TEXT,
     type ENUM('projet', 'publication', 'evenement', 'soutenance'),
-    image VARCHAR(255),
-    lien_detail VARCHAR(255),
-    date_publication DATETIME,
-    affichage_diaporama BOOLEAN
+    date_publication DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 );
 
 CREATE TABLE evenements (
@@ -154,17 +150,17 @@ CREATE TABLE evenements (
     titre VARCHAR(200),
     description TEXT,
     type VARCHAR(50),
+    isPublic BOOLEAN NOT NULL DEFAULT FALSE,
     lieu VARCHAR(100),
     date_debut DATETIME,
     date_fin DATETIME,
-    nb_max_participants INT,
-    image VARCHAR(255)
+    nb_max_participants INT
 );
 
 CREATE TABLE inscription_evenement (
     id INT PRIMARY KEY AUTO_INCREMENT,
     id_evenement INT,
-    id_user INT,
+    id_user INT NULL,
     date_inscription DATETIME,
     FOREIGN KEY (id_evenement) REFERENCES evenements(id_evenement),
     FOREIGN KEY (id_user) REFERENCES users(id_user)

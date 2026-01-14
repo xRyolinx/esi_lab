@@ -31,7 +31,7 @@ class Equipes extends BaseModel
         // Equipe a des equipements (one-to-many if you add id_equipe in equipements)
         // 'equipements' => [...]
     ];
-    protected static $specific_relations = ['nb_pubs', 'ressources'];
+    protected static $specific_relations = ['nb_pubs', 'ressources', 'publications'];
 
     protected static $fillable = [
         'nom_equipe',
@@ -66,16 +66,57 @@ class Equipes extends BaseModel
                 primary: 'id_user',
                 foreign: 'id_user'
             )->leftJoin(
-                modelClass: 'Equipements',
-                primary: 'reservations.id_equipement',
-                foreign: 'id_equipement'
-            );
-            
+                    modelClass: 'Equipements',
+                    primary: 'reservations.id_equipement',
+                    foreign: 'id_equipement'
+                );
+
             $data = $model->getAllIndexedBy(column: 'id_equipe');
 
-            
+
             foreach ($equipes as &$equipe) {
-                $equipe['ressources'] = $data[$equipe['id_equipe']] ?? [];
+                $ressources = $data[$equipe['id_equipe']] ?? [];
+                
+                // Garder une seule occurrence par id_publication
+                $unique_arr = [];
+                foreach ($ressources as $ressource) {
+                    $unique_arr[$ressource['id_equipement']] = $ressource;
+                }
+                
+                // Réindexer le tableau
+                $equipe['ressources'] = array_values($unique_arr);
+            }
+        }
+
+        if (in_array('publications', $include)) {
+            $model = PublicationAuteur::leftJoin(
+                modelClass: 'Publications',
+                primary: 'id_publication',
+                foreign: 'id_publication'
+            )->leftJoin(
+                modelClass: 'Users',
+                primary: 'publication_auteur.id_user',
+                foreign: 'id_user'
+            )->leftJoin(
+                    modelClass: 'Equipes',
+                    primary: 'users.id_equipe',
+                    foreign: 'id_equipe'
+                );
+
+            $data = $model->getAllIndexedBy(column: 'id_equipe');
+
+            // associer a chaque equipe ses publications
+            foreach ($equipes as &$equipe) {
+                $pubs = $data[$equipe['id_equipe']] ?? [];
+                
+                // Garder une seule occurrence par id_publication
+                $unique_arr = [];
+                foreach ($pubs as $pub) {
+                    $unique_arr[$pub['id_publication']] = $pub;
+                }
+                
+                // Réindexer le tableau
+                $equipe['publications'] = array_values($unique_arr);
             }
         }
 

@@ -17,6 +17,7 @@ class Users extends BaseModel
         'domaine_recherche',
         'biographie',
         'role',
+        'poste',
         'statut',
         'date_creation',
         'id_equipe'
@@ -82,6 +83,7 @@ class Users extends BaseModel
         'domaine_recherche',
         'biographie',
         'role',
+        'poste',
         'statut',
         'date_creation',
         'id_equipe'
@@ -102,6 +104,7 @@ class Users extends BaseModel
     public $domaine_recherche;
     public $biographie;
     public $role;
+    public $poste;
     public $statut;
     public $date_creation;
     public $id_equipe;

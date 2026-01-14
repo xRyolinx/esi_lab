@@ -55,7 +55,7 @@ abstract class MainTemplate extends BaseTemplate
         $userData = SessionManager::getUserData();
         $authLinks = [
             'dashboard' => ['/admin/dashboard', 'Dashboard', 'tachometer-alt'],
-            'profil' => ['/profil', 'Profil', 'user-circle'],
+            'profil' => ['/admin/profile', 'Profil', 'user-circle'],
             'logout' => ['/logout', 'Logout', 'sign-out-alt'],
         ];
 
@@ -109,6 +109,7 @@ abstract class MainTemplate extends BaseTemplate
                                 <?php if ($userData['role'] === 'admin') {
                                     ?>
                                     <a href="/admin/dashboard" class="<?= $classLink ?>">Admin</a>
+                                    <a href="/admin/actualites" class="<?= $classLink ?>">Actualités</a>
                                     <?php
                                 }?>
                                 <?php foreach ($authLinks as [$url, $label, $icon]): ?>
@@ -137,16 +138,17 @@ abstract class MainTemplate extends BaseTemplate
     private function nav()
     {
         $links = [
-            'index' => ['/', 'Accueil', 'home'],
-            'projets' => ['/projets', 'Projets', 'project-diagram'],
-            'publications' => ['/publications', 'Publications', 'book'],
-            'equipements' => ['/equipements', 'Équipements', 'laptop'],
-            'membres' => ['/membres', 'Membres', 'users'],
-            'evenements' => ['/evenements', 'Événements', 'calendar'],
-            'contact' => ['/contact', 'Contact', 'envelope'],
+            'index' => ['/', 'Accueil', 'home', []],
+            'equipes' => ['/equipes', 'Équipes', 'users', ['/users']],
+            'projets' => ['/projets', 'Projets', 'project-diagram', []],
+            'publications' => ['/publications', 'Publications', 'book', []],
+            'actualites' => ['/actualites', 'Actualités', 'newspaper', []],
+            // 'equipements' => ['/equipements', 'Équipements', 'laptop', []],
+            'evenements' => ['/evenements', 'Événements', 'calendar', []],
+            'contact' => ['/contact', 'Contact', 'envelope', []],
         ];
 
-        $currentPage = basename($_SERVER['PHP_SELF'], '.php');
+        $current = $_SERVER['REQUEST_URI'];
 
         ?>
         <!-- Navigation -->
@@ -158,9 +160,21 @@ abstract class MainTemplate extends BaseTemplate
                     gap-2 py-2 ">
 
                     <?php
-                    foreach ($links as $key => [$url, $label, $icon]):
-                        $active = $currentPage === $key
-                            ? 'text-secondary bg-secondary/10'
+                    foreach ($links as $key => [$url, $label, $icon, $aliases]):
+                        $currentPage = strpos($current, $url) === 0 ? true : false;
+                        $isActive = ($currentPage && $key !== 'index' && $current !== '/')
+                        || ($key === 'index' && $current === '/');
+                        // check si on est dans un alias
+                        if (!$isActive && !empty($aliases)) {
+                            foreach ($aliases as $alias) {
+                                if (strpos($current, $alias) === 0) {
+                                    $isActive = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        $active = $isActive ? 'text-secondary bg-secondary/10'
                             : 'text-gray-700 hover:bg-gray-100';
                         ?>
                         <li>

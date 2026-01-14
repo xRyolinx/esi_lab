@@ -31,6 +31,7 @@ class RegisterPage extends MainTemplate
                     "Nom d'utilisateur",
                 'required' => true
             ],
+            ['type' => 'text', 'name' => 'poste', 'label' => 'Poste'],
             ['type' => 'password', 'name' => 'password', 'label' => 'Mot de passe', 'required' => true],
             [
                 'type' => 'select',

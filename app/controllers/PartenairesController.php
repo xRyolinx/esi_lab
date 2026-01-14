@@ -61,7 +61,7 @@ class PartenairesController
         $partenaire = [
             'nom' => $_POST['nom'],
             'type' => $_POST['type'],
-            'logo' => $_POST['logo'] ?? '',
+            'logo' => '/img/default_profile_picture.jpg',
             'site_web' => $_POST['site_web'] ?? '',
             'description' => $_POST['description'] ?? '',
         ];

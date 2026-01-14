@@ -48,12 +48,20 @@ class Middlewares
             $id_user = SessionManager::getUserId();
             $user = Users::getUnique(conditions: [['id_user' => ['valeur' => $id_user]]]);
             if ($user) {
-                $user_protected = Users::hide($user);
-                SessionManager::setUser($user_protected);
+                if ($user['statut'] !== 'actif') {
+                    // logout inactive user
+                    SessionManager::setFlashMessage("error", "Votre compte est " . $user['statut']);
+                    SessionManager::logout();
+                }
+                else {
+                    $user_protected = Users::hide($user);
+                    SessionManager::setUser($user_protected);
+                }
             } else {
                 // nettoyer la session if user n'existe plus
                 SessionManager::logout();
             }
+
         };
     }
 

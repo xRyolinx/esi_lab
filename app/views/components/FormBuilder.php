@@ -7,8 +7,9 @@ class FormBuilder
     private $submitLabel = 'Envoyer';
     private $multipart = false;
     private $disabled = false;
+    private $formId = '';
 
-    public function __construct($fields = [], $action = '', $method = 'POST', $submitLabel = 'Envoyer', $multipart = false, $disabled = false)
+    public function __construct($fields = [], $action = '', $method = 'POST', $submitLabel = 'Envoyer', $multipart = false, $disabled = false, $formId = '')
     {
         $this->fields = $fields;
         $this->action = $action;
@@ -16,13 +17,15 @@ class FormBuilder
         $this->submitLabel = $submitLabel;
         $this->multipart = $multipart;
         $this->disabled = $disabled;
+        $this->formId;
     }
 
     public function render()
     {
         ?>
-        <form method="<?= htmlspecialchars($this->method) ?>" action="<?= htmlspecialchars($this->action) ?>" class="space-y-4"
-            <?php if ($this->multipart): ?> enctype="multipart/form-data" <?php endif; ?>>
+        <form id="<?= htmlspecialchars($this->formId) ?>" method="<?= htmlspecialchars($this->method) ?>"
+            action="<?= htmlspecialchars($this->action) ?>" class="space-y-4" <?php if ($this->multipart): ?>
+                enctype="multipart/form-data" <?php endif; ?>>
             <?php foreach ($this->fields as $field): ?>
                 <?= $this->renderField($field) ?>
             <?php endforeach; ?>
@@ -43,10 +46,11 @@ class FormBuilder
         $type = $field['type'] ?? 'text';
         $name = $field['name'] ?? '';
         $label = $field['label'] ?? '';
-        $required = !empty($field['required']);
+        $required = !empty($field['required']) && $field['required'] == true;
         $options = $field['options'] ?? [];
         $value = $field['value'] ?? '';
         $disabled = $field['disabled'] ?? false;
+        $checked = !empty($field['checked']) && $field['checked'] == true;
 
         // attributes
         $attrs = '';
@@ -55,6 +59,9 @@ class FormBuilder
         }
         if ($this->disabled || $disabled) {
             $attrs .= ' disabled';
+        }
+        if ($type === 'checkbox' && $checked) {
+            $attrs .= ' checked';
         }
         ob_start();
         ?>
@@ -79,10 +86,14 @@ class FormBuilder
 
     private function renderInput($type, $name, $value, $attrs)
     {
+        if ($type === 'checkbox') {
+            echo json_encode($attrs);
+        }
         ?>
         <input type="<?= htmlspecialchars($type) ?>" name="<?= htmlspecialchars($name) ?>" id="<?= htmlspecialchars($name) ?>"
-            value="<?= htmlspecialchars($value) ?>" <?= $attrs ?>
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary">
+            <?php if (!empty($value))
+                echo 'value="' . htmlspecialchars($value) . '"'; ?>         <?= $attrs ?> class="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-secondary focus:border-secondary
+            <?= ($type === 'checkbox') ? 'w-4 h-4' : 'w-full' ?>">
         <?php
     }
 

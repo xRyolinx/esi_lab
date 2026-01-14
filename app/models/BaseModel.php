@@ -323,16 +323,23 @@ abstract class BaseModel
 
         // assigner aux parents
         foreach ($rows as &$row) {
-            $row[$relationName] = &$children[$row[$selfKey]] ?? [];
+            if (isset($children[$row[$selfKey]])) {
+                $row[$relationName] = &$children[$row[$selfKey]];
+            }
+            else {
+                $row[$relationName] = [];
+            }
         }
 
         // include imbriqué
         if (!empty($subInclude)) {
             // créer tableau de refs au lieu de val
             $childRefs = [];
-            foreach ($rows as &$row) {
-                foreach ($row[$relationName] as &$child) {
-                    $childRefs[] = &$child;
+            if (!empty($rows)) {
+                foreach ($rows as &$row) {
+                    foreach ($row[$relationName] as &$child) {
+                        $childRefs[] = &$child;
+                    }
                 }
             }
 
@@ -372,7 +379,7 @@ abstract class BaseModel
         if (!empty($subInclude)) {
             $parentRefs = [];
             foreach ($rows as &$row) {
-                if ($row[$relationName]) {
+                if (isset($row[$relationName])) {
                     $parentRefs[] = &$row[$relationName];
                 }
             }
@@ -420,15 +427,21 @@ abstract class BaseModel
 
         // assigner aux parents
         foreach ($rows as &$row) {
-            $row[$relationName] = $indexed[$row[$selfKey]] ?? [];
+            if (isset($indexed[$row[$selfKey]])) {
+                $row[$relationName] = $indexed[$row[$selfKey]];
+            } else {
+                $row[$relationName] = [];
+            }
         }
 
         // sous-relations imbriquées
         if (!empty($subInclude)) {
             $childRefs = [];
-            foreach ($rows as &$row) {
-                foreach ($row[$relationName] as &$child) {
-                    $childRefs[] = &$child;
+            if (!empty($rows)) {
+                foreach ($rows as &$row) {
+                    foreach ($row[$relationName] as &$child) {
+                        $childRefs[] = &$child;
+                    }
                 }
             }
 

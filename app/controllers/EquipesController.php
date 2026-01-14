@@ -14,7 +14,7 @@ class EquipesController
     public function allEquipesPage()
     {
         // $equipes = Equipes::getAll(include: ['membres', 'nb_pubs', 'ressources']);
-        $equipes = Equipes::getAll(include: ['membres']);
+        $equipes = Equipes::getAll(include: ['membres', 'nb_pubs']);
         $page = new EquipesPage('Liste des équipes', ['equipes' => $equipes]);
         $page->render();
     }

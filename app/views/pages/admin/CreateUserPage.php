@@ -25,8 +25,8 @@ class CreateUserPage extends AuthTemplate
                 ['type' => 'text', 'name' => 'prenom', 'label' => 'Prénom', 'required' => true],
                 ['type' => 'email', 'name' => 'email', 'label' => 'Email', 'required' => true],
                 ['type' => 'text', 'name' => 'username', 'label' => "Nom d'utilisateur", 'required' => true],
+                ['type' => 'text', 'name' => 'poste', 'label' => 'Poste'],
                 ['type' => 'password', 'name' => 'password', 'label' => 'Mot de passe', 'required' => true],
-                ['type' => 'text', 'name' => 'photo', 'label' => 'Photo (URL)'],
                 [
                     'type' => 'select',
                     'name' => 'grade',

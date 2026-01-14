@@ -21,10 +21,10 @@ class Equipements extends BaseModel {
         ];
     protected static $table = 'equipements';
     protected static $columns = [
-        'id_equipement', 'nom', 'type', 'description', 'etat', 'localisation'
+        'id_equipement', 'nom', 'type', 'description', 'statut', 'localisation'
     ];
     protected static $fillable = [
-        'nom', 'type', 'description', 'etat', 'localisation'
+        'nom', 'type', 'description', 'statut', 'localisation'
     ];
     protected static $hidden = [];
     public static $pk = 'id_equipement';
@@ -35,19 +35,4 @@ class Equipements extends BaseModel {
     public $description;
     public $etat;
     public $localisation;
-
-    public static function getAll($model = null, array $select = [], array $conditions = [], array $include = []) {
-        $equipements = parent::getAll(model: $model, select: $select, conditions: $conditions, include: $include);
-
-        if ($include['user'] ?? false) {
-            $users = Users::getAllIndexedBy(column: 'id_equipement');
-            foreach ($equipements as &$equipement) {
-                $equipement['user'] = $users[$equipement['id_equipement']] ?? [];
-            }
-        }
-        return $equipements;
-    }
-
-    public static function getByUser() {
-    }
 }

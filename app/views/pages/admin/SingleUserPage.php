@@ -39,6 +39,7 @@ class SingleUserPage extends AuthTemplate
                 ['type' => 'text', 'name' => 'prenom', 'label' => 'Prénom', 'required' => true, 'value' => $this->user['prenom'] ?? ''],
                 ['type' => 'email', 'name' => 'email', 'label' => 'Email', 'required' => true, 'value' => $this->user['email'] ?? ''],
                 ['type' => 'text', 'name' => 'username', 'label' => "Nom d'utilisateur", 'required' => true, 'value' => $this->user['username'] ?? ''],
+                ['type' => 'text', 'name' => 'poste', 'label' => 'Poste', 'value' => $this->user['poste'] ?? ''],
                 ['type' => 'text', 'name' => 'photo', 'label' => 'Photo (URL)', 'value' => $this->user['photo'] ?? ''],
                 [
                     'type' => 'select',

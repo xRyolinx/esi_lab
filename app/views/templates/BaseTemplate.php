@@ -1,16 +1,21 @@
 <?php
 require_once __DIR__ . '/../../config/SessionManager.php';
 require_once __DIR__ . '/../components/Notifications.php';
-
+require_once __DIR__ . '/../../models/Parametres.php';
 abstract class BaseTemplate
 {
     protected $title;
+    protected $primary;
+    protected $secondary;
     protected $cssFiles = [];
     protected $jsFiles = [];
 
     public function __construct($title = "ESI LAB")
     {
         $this->title = $title;
+        $params = Parametres::getAllIndexedBy('cle');
+        $this->primary = $params['primary'][0]['valeur'];
+        $this->secondary = $params['secondary'][0]['valeur'];
     }
 
     // ------------- render à implémenter --------------
@@ -49,8 +54,8 @@ abstract class BaseTemplate
                     theme: {
                         extend: {
                             colors: {
-                                primary: { DEFAULT: '#2C3E50', dark: '#1a252f', light: '#34495e' },
-                                secondary: { DEFAULT: '#3498DB', dark: '#2980B9', light: '#5DADE2' },
+                                primary: { DEFAULT: '<?php echo htmlspecialchars($this->primary); ?>', dark: '#1a252f', light: '#34495e' },
+                                secondary: { DEFAULT: '<?php echo htmlspecialchars($this->secondary); ?>', dark: '#2980B9', light: '#5DADE2' },
                                 accent: { DEFAULT: '#E74C3C', dark: '#C0392B', light: '#EC7063' }
                             }
                         }

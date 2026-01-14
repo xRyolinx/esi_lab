@@ -1,0 +1,17 @@
+/* Sidebar scrollbar custom */
+aside::-webkit-scrollbar {
+  width: 8px;
+}
+
+aside::-webkit-scrollbar-track {
+  background: #f3f4f6; /* gris clair pour le track */
+}
+
+aside::-webkit-scrollbar-thumb {
+  background-color: #3498DB; /* rouge foncé (équivalent darkred) */
+  border-radius: 4px;
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+  background-color: #2980B9; /* hover plus foncé */
+}

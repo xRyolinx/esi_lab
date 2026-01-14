@@ -11,13 +11,17 @@ class DashboardPage extends AuthTemplate
     protected function content()
     {
         $links = [
+            'Profil' => ['/admin/profile', 'fa-user-circle'],
             'Utilisateurs' => ['/admin/users', 'fa-users-cog'],
             'Equipes' => ['/admin/equipes', 'fa-users'],
             'Projets' => ['/admin/projets', 'fa-project-diagram'],
+            'Actualités' => ['/admin/actualites', 'fa-bullhorn'],
             'Evenements' => ['/admin/evenements', 'fa-calendar-alt'],
-            'Equipement' => ['/admin/equipement', 'fa-toolbox'],
+            'Equipement' => ['/admin/equipements', 'fa-toolbox'],
             'Publications' => ['/admin/publications', 'fa-book'],
             'Partenaires' => ['/admin/partenaires', 'fa-handshake'],
+            'Contacts' => ['/admin/contacts', 'fa-envelope'],
+            'Paramètres' => ['/admin/parametres', 'fa-cogs'],
         ];
         ?>
         <div class="max-w-5xl mx-auto">

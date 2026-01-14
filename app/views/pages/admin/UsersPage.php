@@ -93,6 +93,7 @@ class UsersPage extends AuthTemplate
                         <tr class="bg-primary text-white">
                             <th class="px-4 py-2">ID</th>
                             <th class="px-4 py-2">Nom & Prénom</th>
+                            <th class="px-4 py-2">Poste</th>
                             <th class="px-4 py-2">Email</th>
                             <th class="px-4 py-2">Username</th>
                             <th class="px-4 py-2">Rôle</th>
@@ -110,6 +111,7 @@ class UsersPage extends AuthTemplate
                                         href="/admin/users/<?= urlencode($user['id_user']) ?>"><?= htmlspecialchars($user['id_user']) ?></a>
                                 </td>
                                 <td class="px-4 py-2"><?= htmlspecialchars($user['nom'] . ' ' . $user['prenom']) ?></td>
+                                <td class="px-4 py-2"><?= htmlspecialchars($user['poste'] ?? '-') ?></td>
                                 <td class="px-4 py-2"><?= htmlspecialchars($user['email']) ?></td>
                                 <td class="px-4 py-2"><?= htmlspecialchars($user['username']) ?></td>
                                 <td class="px-4 py-2">
